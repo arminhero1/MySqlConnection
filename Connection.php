@@ -87,7 +87,8 @@ class Connection
             return false;
         }
 
-        return $conn->query($query);
+        $mysqli_result = $conn->query($query);
+        return $mysqli_result;
     }
 
     /**

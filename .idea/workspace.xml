@@ -78,8 +78,14 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="php.override.implement.member.chooser.php.doc" value="NONE" />
     <property name="settings.editor.selected.configurable" value="copyright.profiles" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Futech Application\Class &amp; Library\PHP\MySqlConnection" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="Run" type="PhpWebAppRunConfigurationType" factoryName="PHP Web Application" server_name="localhost" start_url="/MySqlConnection">
@@ -98,7 +104,8 @@
       <updated>1584735215783</updated>
       <workItem from="1584735218061" duration="18028000" />
       <workItem from="1584863148098" duration="5161000" />
-      <workItem from="1584878287929" duration="2790000" />
+      <workItem from="1584878287929" duration="2986000" />
+      <workItem from="1584904827226" duration="530000" />
     </task>
     <servers />
   </component>

@@ -25,6 +25,8 @@ class ConditionBuilder
 
     private $lastOperator = "and";
 
+    private $conditionKeysCount = array();
+
 
     public static function create_new_condition_builder()
     {
@@ -61,12 +63,20 @@ class ConditionBuilder
         if($condition == self::$LIKE && gettype($value) != "string") {
             return $this;
         }
-        if(!array_key_exists($columnName, $this->conditions)) {
-            $this->conditions[$columnName] = $value;
-            $this->operators[$columnName] = $operator;
-            $this->conditionsStates[$columnName] = $condition;
-            $this->lastOperator = $operator;
+
+        $columnName = "`$columnName`";
+
+        if (!array_key_exists($columnName, $this->conditionKeysCount)) {
+            $this->conditionKeysCount[$columnName] = 1;
+        } else {
+            $this->conditionKeysCount[$columnName]++;
+            $columnName .= '/*' . $this->conditionKeysCount[$columnName] . '*/';
         }
+
+        $this->conditions[$columnName] = $value;
+        $this->operators[$columnName] = $operator;
+        $this->conditionsStates[$columnName] = $condition;
+        $this->lastOperator = $operator;
         return $this;
     }
 
@@ -99,7 +109,7 @@ class ConditionBuilder
                 $condition .= " " . $this->operators[$columnName] . " ";
             }
 
-            $condition .= "`$columnName` " . $this->conditionsStates[$columnName] . " " . self::fix_value_format($value);
+            $condition .= "$columnName " . $this->conditionsStates[$columnName] . " " . self::fix_value_format($value);
         }
         return $condition;
     }

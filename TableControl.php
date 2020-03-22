@@ -94,7 +94,7 @@ class TableControl
         foreach ($values as $key => $value) {
             $condition->addWithOperator($key, $value, ConditionBuilder::$AND);
         }
-
+        $selectQuery->set_condition($condition);
         return count($this->select_query($selectQuery)) > 0;
     }
 
@@ -127,10 +127,10 @@ class TableControl
     /**
      * Select by condition from table
      * @param string|array $condition
-     * @return bool|mysqli_result
+     * @return array
      */
     public function select_with_condition($condition)
     {
-        return $this->connection->run_query(QueryCreator::select_query($this->tableName, $condition));
+        return $this->connection->run_select_query(QueryCreator::select_query($this->tableName, $condition));
     }
 }

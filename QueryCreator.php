@@ -87,11 +87,14 @@ namespace MySqlConnection {
 
         /**
          * create a format of condition for queries
-         * @param $condition
+         * @param string|array $condition
          * @return string
          */
         private static function get_condition($condition)
         {
+            if (gettype($condition) == "array") {
+                $condition = ConditionBuilder::array_condition_to_string($condition);
+            }
             return (($condition == "") ? "" : (" WHERE " . $condition));
         }
 
@@ -138,7 +141,7 @@ namespace MySqlConnection {
     class SelectQueryCreator
     {
         const ORDER_BY_OPTION_DESC = "DESC";
-        const ORDER_BY_OPTION_ACS = "ACS";
+        const ORDER_BY_OPTION_ASC = "ASC";
 
         const JOIN_ALIGN_LEFT = "LEFT";
         const JOIN_ALIGN_RIGHT = "RIGHT";
@@ -182,7 +185,7 @@ namespace MySqlConnection {
             if(gettype($condition) == "array") $condition = ConditionBuilder::array_condition_to_string($condition);
 
             if($condition != '') {
-                $this->condition = "WHERE $condition";
+                $this->condition = "WHERE $condition ";
             }
             return $this;
         }
@@ -195,9 +198,10 @@ namespace MySqlConnection {
          */
         public function set_order_by($column, $order_option = 'DESC')
         {
-            if(strtolower($order_option) != self::ORDER_BY_OPTION_ACS || strtolower($order_option) != self::ORDER_BY_OPTION_DESC)
+            if(strtoupper($order_option) != self::ORDER_BY_OPTION_ASC && strtoupper($order_option) != self::ORDER_BY_OPTION_DESC) {
                 return $this;
-            $this->orderBy = "ORDER BY $column $order_option";
+            }
+            $this->orderBy = "ORDER BY $column $order_option ";
             return $this;
         }
 
@@ -219,7 +223,7 @@ namespace MySqlConnection {
          */
         public function set_limit_max($min, $max)
         {
-            $this->limit = "LIMIT $min, $max";
+            $this->limit = "LIMIT $min, $max ";
             return $this;
         }
 
@@ -230,7 +234,7 @@ namespace MySqlConnection {
          */
         public function set_limit($limit)
         {
-            $this->limit = "LIMIT $limit";
+            $this->limit = "LIMIT $limit ";
             return $this;
         }
 
@@ -251,7 +255,7 @@ namespace MySqlConnection {
          */
         public function set_group($columnName)
         {
-            $this->group = "GROUP BY $columnName";
+            $this->group = "GROUP BY $columnName ";
             return $this;
         }
 
@@ -326,7 +330,7 @@ namespace MySqlConnection {
                 }
             }
 
-            $this->joinDatabase = "$align JOIN `$database` USING $using_str";
+            $this->joinDatabase = "$align JOIN `$database` USING $using_str ";
             return $this;
         }
 
@@ -361,7 +365,7 @@ namespace MySqlConnection {
                 $tablesStr = $tables;
             }
 
-            $this->columns = "CONCAT ($tablesStr) AS $contactName";
+            $this->columns = "CONCAT ($tablesStr) AS $contactName ";
             return $this;
         }
 
@@ -379,7 +383,7 @@ namespace MySqlConnection {
          */
         public function __toString()
         {
-            return trim("SELECT " . $this->columns . " FROM " . $this->table . " " . $this->joinDatabase . " " . $this->condition . " " . $this->orderBy . " " . $this->group . " " . $this->limit);
+            return trim("SELECT " . $this->columns . " FROM " . $this->table . ' ' . $this->joinDatabase . $this->condition . $this->orderBy . $this->group . $this->limit);
         }
 
 
