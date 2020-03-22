@@ -58,6 +58,9 @@ class ConditionBuilder
         if($condition == self::$LIKE && gettype($value) != "string") {
             return $this;
         }
+        if($condition == self::$LIKE && gettype($value) != "string") {
+            return $this;
+        }
         if(!array_key_exists($columnName, $this->conditions)) {
             $this->conditions[$columnName] = $value;
             $this->operators[$columnName] = $operator;
@@ -65,6 +68,11 @@ class ConditionBuilder
             $this->lastOperator = $operator;
         }
         return $this;
+    }
+
+    public function addWithCondition($columnName, $value, $condition)
+    {
+        return $this->addWithOperatorAndCondition($columnName, $value, $this->lastOperator, $condition);
     }
 
     /**

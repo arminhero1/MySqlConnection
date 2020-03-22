@@ -21,24 +21,18 @@ class Server
      * @var string
      */
     private $password;
-    /**
-     * @var int
-     */
-    private $port;
 
     /**
      * Server constructor.
      * @param string $server
      * @param string $username
      * @param string $password
-     * @param int $port
      */
-    public function __construct($server, $username, $password, $port)
+    public function __construct($server, $username, $password)
     {
         $this->server = $server;
         $this->username = $username;
         $this->password = $password;
-        $this->port = $port;
     }
 
     /**
@@ -46,7 +40,7 @@ class Server
      */
     public static function get_default_localhost()
     {
-        return new Server("localhost", "root", "", 3306);
+        return new Server("localhost", "root", "");
     }
 
     /**

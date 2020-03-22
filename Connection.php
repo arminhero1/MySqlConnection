@@ -5,9 +5,6 @@ namespace MySqlConnection;
 use mysqli;
 use mysqli_result;
 
-if (!class_exists("Server"))
-    include_once "Server.php";
-
 class Connection
 {
     /**
@@ -18,6 +15,14 @@ class Connection
      * @var string
      */
     private $database;
+    /**
+     * @var false|mysqli
+     */
+    private $link;
+    /**
+     * @var mysqli
+     */
+    private $last_connection;
 
     /**
      * Connection constructor.
@@ -30,11 +35,18 @@ class Connection
         $this->database = $database;
     }
 
+    public static function create_connection($host, $username, $password, $dbName)
+    {
+        $server = new Server($host, $username, $password);
+        return new Connection($server, $dbName);
+    }
+
     /**
      * @return mysqli
      */
     private function get_connection()
     {
+        $this->link = mysqli_connect($this->server->getServer(), $this->server->getUsername(), $this->server->getPassword());
         return new mysqli($this->server->getServer(), $this->server->getUsername(), $this->server->getPassword(), $this->database);
     }
 
@@ -47,10 +59,38 @@ class Connection
     }
 
     /**
+     * a string description of the last error
+     * @return string
+     */
+    public function get_error()
+    {
+        return mysqli_error($this->link);
+    }
+
+    /**
+     * Run and get result from Mysql Query
      * @param string $query
      * @return bool|mysqli_result
      */
     public function run_query($query)
+    {
+        if ($this->last_connection != null)
+            $this->last_connection->close();
+        $conn = $this->get_connection();
+        $this->last_connection = $conn;
+        if($conn->connect_error) {
+            return false;
+        }
+
+        return $conn->query($query);
+    }
+
+    /**
+     * @param string $query
+     * @param mysqli $conn
+     * @return bool|mysqli_result
+     */
+    public function run_query_connection($query, &$conn)
     {
         $conn = $this->get_connection();
         if($conn->connect_error) {
@@ -61,6 +101,7 @@ class Connection
     }
 
     /**
+     * get result from mysql query have result like queries contain 'SELECT'
      * @param string $query
      * @return array
      */

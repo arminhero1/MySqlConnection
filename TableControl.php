@@ -10,15 +10,8 @@
 namespace MySqlConnection;
 
 
+use mysqli;
 use mysqli_result;
-
-if(!class_exists("QueryCreator")) {
-    include_once "QueryCreator.php";
-}
-
-if(!class_exists("Connection")) {
-    include_once "Connection.php";
-}
 
 class TableControl
 {
@@ -45,11 +38,12 @@ class TableControl
     /**
      * insert new value to table
      * @param $dataList
-     * @return bool|mysqli_result
+     * @return int
      */
     public function insert_query($dataList)
     {
-        return $this->connection->run_query(QueryCreator::insert_query($this->tableName, $dataList));
+        $this->connection->run_query_connection(QueryCreator::insert_query($this->tableName, $dataList), $conn);
+        return mysqli_insert_id($conn);
     }
 
     /**
@@ -65,11 +59,10 @@ class TableControl
 
     /**
      * Delete value from table
-     * @param $dataList
      * @param $condition
      * @return bool|mysqli_result
      */
-    public function delete_query($dataList, $condition)
+    public function delete_query($condition)
     {
         return $this->connection->run_query(QueryCreator::delete_query($this->tableName, $condition));
     }

@@ -337,6 +337,15 @@ namespace MySqlConnection {
         }
 
         /**
+         * @param Connection $connection
+         * @return array
+         */
+        public function run_query($connection)
+        {
+            return $connection->run_select_query((string)$this);
+        }
+
+        /**
          * @return string query result
          */
         public function __toString()
