@@ -57,10 +57,9 @@ namespace MySqlConnection {
          * create default select mysql Query
          * @param string $tableName
          * @param string $condition
-         * @param string $orderBy
          * @return string
          */
-        public static function select_query($tableName, $condition, $orderBy = '')
+        public static function select_query($tableName, $condition)
         {
             return "SELECT * FROM $tableName" . self::get_condition($condition);
         }
@@ -113,6 +112,27 @@ namespace MySqlConnection {
                 return $value;
             }
         }
+
+        /**
+         * get count of rows by condition from table
+         * @param string $table
+         * @param string|array $condition
+         * @param string $column
+         * @return string
+         */
+        public static function select_count_query($table, $column = '*', $condition = '')
+        {
+            $selectQuery = new SelectQueryCreator($table);
+            if(gettype($condition) == "array") {
+                $selectQuery->set_condition(ConditionBuilder::array_condition_to_string($condition));
+            } else {
+                $selectQuery->set_condition($condition);
+            }
+
+            $selectQuery->select_columns("COUNT($column)");
+
+            return $selectQuery;
+        }
     }
 
     class SelectQueryCreator
@@ -141,6 +161,11 @@ namespace MySqlConnection {
             $this->table = $table;
         }
 
+        /**
+         * Create SelectQueryCreator static
+         * @param $table
+         * @return SelectQueryCreator
+         */
         public static function new_select_query($table)
         {
             return new SelectQueryCreator($table);
@@ -149,12 +174,16 @@ namespace MySqlConnection {
 
         /**
          * set condition for select from table
-         * @param $condition
+         * @param string|array $condition
          * @return $this
          */
         public function set_condition($condition)
         {
-            $this->condition = "WHERE $condition";
+            if(gettype($condition) == "array") $condition = ConditionBuilder::array_condition_to_string($condition);
+
+            if($condition != '') {
+                $this->condition = "WHERE $condition";
+            }
             return $this;
         }
 
@@ -350,7 +379,7 @@ namespace MySqlConnection {
          */
         public function __toString()
         {
-            return "SELECT " . $this->columns . " FROM " . $this->table . " " . $this->joinDatabase . " " . $this->condition . " " . $this->orderBy . " " . $this->group . " " . $this->limit;
+            return trim("SELECT " . $this->columns . " FROM " . $this->table . " " . $this->joinDatabase . " " . $this->condition . " " . $this->orderBy . " " . $this->group . " " . $this->limit);
         }
 
 

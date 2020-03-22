@@ -16,10 +16,6 @@ class Connection
      */
     private $database;
     /**
-     * @var false|mysqli
-     */
-    private $link;
-    /**
      * @var mysqli
      */
     private $last_connection;
@@ -35,6 +31,14 @@ class Connection
         $this->database = $database;
     }
 
+    /**
+     * new Connection class without Server object
+     * @param string $host
+     * @param string $username
+     * @param string $password
+     * @param string $dbName
+     * @return Connection
+     */
     public static function create_connection($host, $username, $password, $dbName)
     {
         $server = new Server($host, $username, $password);
@@ -42,15 +46,16 @@ class Connection
     }
 
     /**
+     * create new mysql connection
      * @return mysqli
      */
     private function get_connection()
     {
-        $this->link = mysqli_connect($this->server->getServer(), $this->server->getUsername(), $this->server->getPassword());
         return new mysqli($this->server->getServer(), $this->server->getUsername(), $this->server->getPassword(), $this->database);
     }
 
     /**
+     * get a string if your connection has error
      * @return string
      */
     public function get_connect_error()
@@ -59,12 +64,12 @@ class Connection
     }
 
     /**
-     * a string description of the last error
+     * a string description of the last error like your queries error
      * @return string
      */
-    public function get_error()
+    public function get_last_error()
     {
-        return mysqli_error($this->link);
+        return mysqli_error($this->last_connection);
     }
 
     /**
@@ -74,7 +79,7 @@ class Connection
      */
     public function run_query($query)
     {
-        if ($this->last_connection != null)
+        if($this->last_connection != null)
             $this->last_connection->close();
         $conn = $this->get_connection();
         $this->last_connection = $conn;
@@ -86,6 +91,7 @@ class Connection
     }
 
     /**
+     * Run your query and get connection used for this run query
      * @param string $query
      * @param mysqli $conn
      * @return bool|mysqli_result
@@ -110,7 +116,7 @@ class Connection
         $selectValues = array();
 
         $result = $this->run_query($query);
-        if($result != false && $result->num_rows > 0 && $result->fetch_assoc() != null) {
+        if($result != false && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $select = array();
 

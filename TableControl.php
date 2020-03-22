@@ -52,7 +52,7 @@ class TableControl
      * @param string $condition
      * @return bool|mysqli_result
      */
-    public function update_query($dataList, $condition)
+    public function update_query($dataList, $condition = '')
     {
         return $this->connection->run_query(QueryCreator::update_query($this->tableName, $dataList, $condition));
     }
@@ -62,11 +62,17 @@ class TableControl
      * @param $condition
      * @return bool|mysqli_result
      */
-    public function delete_query($condition)
+    public function delete_query($condition = '')
     {
         return $this->connection->run_query(QueryCreator::delete_query($this->tableName, $condition));
     }
 
+    /**
+     * check a variable exist in a table.
+     * @param string $key
+     * @param $value
+     * @return bool
+     */
     public function value_exist($key, $value)
     {
         $selectQuery = new SelectQueryCreator($this->tableName);
@@ -76,7 +82,13 @@ class TableControl
         return count($this->select_query($selectQuery)) > 0;
     }
 
-    public function values_exist($values) {
+    /**
+     * check multiple variables exist in a table
+     * @param $values
+     * @return bool
+     */
+    public function values_exist($values)
+    {
         $selectQuery = new SelectQueryCreator($this->tableName);
         $condition = new ConditionBuilder();
         foreach ($values as $key => $value) {
@@ -87,11 +99,38 @@ class TableControl
     }
 
     /**
+     * get count of rows by condition from table
+     * @param string|array $condition
+     * @param string $column
+     * @return int
+     */
+    public function select_count($condition, $column = '*')
+    {
+        $countValues = $this->connection->run_select_query(QueryCreator::select_count_query($condition));
+        if (count($countValues) == 0 || !array_key_exists("COUNT($column)", $countValues)) {
+            return 0;
+        }
+
+        return $countValues[0]["COUNT($column)"];
+    }
+
+    /**
+     * Select values by SelectQueryCreator object
      * @param SelectQueryCreator $selectQuery
      * @return array
      */
     public function select_query($selectQuery)
     {
         return $this->connection->run_select_query($selectQuery);
+    }
+
+    /**
+     * Select by condition from table
+     * @param string|array $condition
+     * @return bool|mysqli_result
+     */
+    public function select_with_condition($condition)
+    {
+        return $this->connection->run_query(QueryCreator::select_query($this->tableName, $condition));
     }
 }

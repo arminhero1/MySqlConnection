@@ -104,6 +104,27 @@ class ConditionBuilder
         return $condition;
     }
 
+    /**
+     * convert array condition to string
+     * example
+     *      input: array['id' => 2, 'name' => 'Abolfazl']
+     *      output: 'id=2 and name='Abolfazl''
+     * @param array $conditions
+     * @return string
+     */
+    public static function array_condition_to_string($conditions)
+    {
+        $conditionString = "";
+
+        foreach ($conditions as $key => $value) {
+            if($conditionString != "")
+                $conditionString .= " and ";
+            $conditionString .= "$key=" . self::fix_value_format($value);
+        }
+
+        return $conditionString;
+    }
+
     private static function fix_value_format($value)
     {
         if(gettype($value) == "string") {
