@@ -84,7 +84,7 @@ class TableControl
 
     /**
      * check multiple variables exist in a table
-     * @param $values
+     * @param array $values like ['username' => 'abolfazl.alz', 'password'='1234']
      * @return bool
      */
     public function values_exist($values)
@@ -104,10 +104,10 @@ class TableControl
      * @param string $column
      * @return int
      */
-    public function select_count($condition, $column = '*')
+    public function select_count($condition = '', $column = '*')
     {
         $countValues = $this->connection->run_select_query(QueryCreator::select_count_query($condition));
-        if (count($countValues) == 0 || !array_key_exists("COUNT($column)", $countValues)) {
+        if(count($countValues) == 0 || !array_key_exists("COUNT($column)", $countValues)) {
             return 0;
         }
 
@@ -132,5 +132,41 @@ class TableControl
     public function select_with_condition($condition)
     {
         return $this->connection->run_select_query(QueryCreator::select_query($this->tableName, $condition));
+    }
+
+    /**
+     * connection use for this TableControl
+     * @return Connection
+     */
+    public function get_connection()
+    {
+        return $this->connection;
+    }
+
+    /**
+     * first check value or values not exist in a table then insert value
+     * @param array $dataList values for insert to table
+     * @param array|string $itemsToCheck like ['username' => 'abolfazl']
+     * @return int column index result
+     */
+    public function insert_if_not_exist($dataList, $itemsToCheck)
+    {
+        if ($this->select_count($itemsToCheck) > 0)
+            return -1;
+        return $this->insert_query($dataList);
+    }
+
+    /**
+     * It first checks whether the value exists
+     * Updates it if it exists
+     * If it doesn't, it exaggerates
+     * @param array $dataList
+     * @param array|string $itemsToCheck like ['username' => 'abolfazl']
+     * @return bool|int|mysqli_result
+     */
+    public function insert_if_exist_update($dataList, $itemsToCheck) {
+        if ($this->select_count($itemsToCheck) > 0)
+            return $this->update_query($dataList, $itemsToCheck);
+        return $this->insert_query($dataList);
     }
 }
