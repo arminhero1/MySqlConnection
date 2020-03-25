@@ -26,11 +26,23 @@ class ConditionBuilder
     private $lastOperator = "and";
 
     private $conditionKeysCount = array();
+    /**
+     * @var bool
+     */
+    private $fix_value;
 
-
-    public static function create_new_condition_builder()
+    /**
+     * ConditionBuilder constructor.
+     * @param bool $fix_value
+     */
+    public function __construct($fix_value = true)
     {
-        return new ConditionBuilder();
+        $this->fix_value = $fix_value;
+    }
+
+    public static function create_new_condition_builder($fix_value = true)
+    {
+        return new ConditionBuilder($fix_value);
     }
 
 
@@ -109,27 +121,31 @@ class ConditionBuilder
                 $condition .= " " . $this->operators[$columnName] . " ";
             }
 
-            $condition .= "$columnName " . $this->conditionsStates[$columnName] . " " . self::fix_value_format($value);
+            $condition .= "$columnName " . $this->conditionsStates[$columnName] . " " . $this->fix_value ? self::fix_value_format($value) : $value;
         }
         return $condition;
     }
 
     /**
      * convert array condition to string
-     * example
+     * example 1: if $fix_value is true
      *      input: array['id' => 2, 'name' => 'Abolfazl']
      *      output: 'id=2 and name='Abolfazl''
+     * example 2: if $fix_value is false
+     *      input: array['id' => 2, 'name' => 'Abolfazl']
+     *      output: 'id=2 and name=abolfazl'
      * @param array $conditions
+     * @param bool $fix_value fix values by that type
      * @return string
      */
-    public static function array_condition_to_string($conditions)
+    public static function array_condition_to_string($conditions, $fix_value = true)
     {
         $conditionString = "";
 
         foreach ($conditions as $key => $value) {
             if($conditionString != "")
                 $conditionString .= " and ";
-            $conditionString .= "$key=" . self::fix_value_format($value);
+            $conditionString .= "$key=" . ($fix_value ? self::fix_value_format($value) : $value);
         }
 
         return $conditionString;

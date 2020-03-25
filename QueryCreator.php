@@ -92,7 +92,7 @@ namespace MySqlConnection {
          */
         private static function get_condition($condition)
         {
-            if (gettype($condition) == "array") {
+            if(gettype($condition) == "array") {
                 $condition = ConditionBuilder::array_condition_to_string($condition);
             }
             return (($condition == "") ? "" : (" WHERE " . $condition));
@@ -143,8 +143,10 @@ namespace MySqlConnection {
         const ORDER_BY_OPTION_DESC = "DESC";
         const ORDER_BY_OPTION_ASC = "ASC";
 
-        const JOIN_ALIGN_LEFT = "LEFT";
-        const JOIN_ALIGN_RIGHT = "RIGHT";
+        const JOIN_TYPE_INNER = "INNER";
+        const JOIN_TYPE_LEFT = "LEFT";
+        const JOIN_TYPE_RIGHT = "RIGHT";
+        const JOIN_TYPE_FULL = "FULL";
 
 
         private $condition;
@@ -309,28 +311,36 @@ namespace MySqlConnection {
 
         /**
          * join a database to your query
-         * @param string $database second database's name
-         * @param string|string[] $using tables you want to join your query
-         * @param string $align it's should have 'RIGHT' or 'LEFT' value
+         * @param string $table table you want to add
+         * @param string|string[]|ConditionBuilder $condition
+         * @param string $type JOINs type
          * @return $this
+         *
+         * if you want use ConditionBuilder as your condition you should set 'FALSE' in ConditionBuilder:
+         *      i mean you should use: $condition = new ConditionBuilder(false);
          */
-        public function join_database($database, $using, $align = 'RIGHT')
+        public function join_database($table, $condition, $type = 'INNER')
         {
-            if(strtolower($align) != self::JOIN_ALIGN_LEFT || strtolower($align) != self::JOIN_ALIGN_RIGHT)
-                return $this;
-            $using_str = "";
+            if(gettype($condition) == "array") {
 
-            if(gettype($using) == 'string') {
-                $using_str = $using;
-            } elseif(gettype($using) == 'string[]' or gettype($using) == 'array') {
-                foreach ($using as $item) {
-                    if($using_str != "")
-                        $using_str .= ', ';
-                    $using_str .= $item;
+                foreach ($condition as $key => $value) {
+                    $newKey = $key;
+                    $newValue = $value;
+                    if(!$this->startsWith($key, $this->table)) {
+                        $newKey = $this->table . '.' . $key;
+                    }
+                    if (!$this->startsWith($value, $table)) {
+                        $newValue = $table . '.' . $value;
+                    }
+
+                    $condition[$newKey] = $newValue;
+                    unset($condition[$key]);
                 }
+
+                $condition = ConditionBuilder::array_condition_to_string($condition, false);
             }
 
-            $this->joinDatabase = "$align JOIN `$database` USING $using_str ";
+            $this->joinDatabase = "$type JOIN `$table` " . (($condition != '') ? "on $condition" : '') . ' ';
             return $this;
         }
 
@@ -384,6 +394,13 @@ namespace MySqlConnection {
         public function __toString()
         {
             return trim("SELECT " . $this->columns . " FROM " . $this->table . ' ' . $this->joinDatabase . $this->condition . $this->orderBy . $this->group . $this->limit);
+        }
+
+
+        private function startsWith($string, $startString)
+        {
+            $len = strlen($startString);
+            return (substr($string, 0, $len) === $startString);
         }
 
 
